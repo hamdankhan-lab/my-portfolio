@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hamdan Khan — Portfolio</title>
+  <meta name="description" content="Stunning portfolio showcasing design, motion, and web craftsmanship." />
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="dist/tailwind.css">
+
+   <!-- Link to external CSS (you asked for separate files) -->
+ <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon_io/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+  <div class="site-wrapper">
+
+    <header class="site-header">
+      <nav class="nav container">
+        <a class="brand" href="#">Hamdan Khan</a>
+        <ul class="nav-list">
+          <li><a href="#about">About</a></li>
+          <li><a href="#work">Work</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a class="cta" href="#contact">Hire me</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero container">
+        <div class="hero-content">
+          <h1 class="eyebrow">Hello — I’m <span class="name">Hamdan Khan</span></h1>
+          <p class="lead">I craft beautiful, fast, and accessible websites — blending visual design with pixel-perfect code.</p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="#work">See my work</a>
+            <a class="btn-ghost" href="#contact">Get in touch</a>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <!-- Decorative layered artwork; replace with real image if desired -->
+          <div class="card-glass">
+            <img src="image/picture.png" alt="Hamdan khan portrait" class="portrait">
+            <div class="accent-band"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="about container">
+        <div class="about-grid">
+          <div class="about-text">
+            <h2>Designer & Front-end Developer</h2>
+            <p>I design intuitive interfaces and implement them with modern web technologies. My work focuses on clarity, motion, and performance — ensuring delightful experiences across devices.</p>
+            <ul class="stats">
+              <li><strong>8+</strong> years experience</li>
+              <li><strong>120+</strong> projects</li>
+              <li><strong>Remote</strong> worldwide</li>
+            </ul>
+            <a class="btn-outline" href="#services">What I offer</a>
+          </div>
+
+          <div class="skills">
+            <div class="skill">Branding & Visual Identity</div>
+            <div class="skill">UX / Interaction Design</div>
+            <div class="skill">Responsive Front-end</div>
+            <div class="skill">Motion & Micro-interactions</div>
+            <div class="skill">Design Systems</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WORK -->
+      <section id="work" class="work container">
+        <h2 class="section-title">Selected Work</h2>
+        <div class="work-grid">
+
+          <article class="project">
+            <figure>
+              <img src="project1.jpg" alt="Project 1 screenshot">
+            </figure>
+            <div class="project-body">
+              <h3>Stellar Commerce</h3>
+              <p>Elegant e‑commerce experience with motion-led product discovery.</p>
+              <a class="link" href="#">View case study</a>
+            </div>
+          </article>
+
+          <article class="project">
+            <figure>
+              <img src="project2.jpg" alt="Project 2 screenshot">
+            </figure>
+            <div class="project-body">
+              <h3>Nimbus Dashboard</h3>
+              <p>Data-heavy dashboard transformed with clarity-first design systems.</p>
+              <a class="link" href="#">View case study</a>
+            </div>
+          </article>
+
+          <article class="project">
+            <figure>
+              <img src="project3.jpg" alt="Project 3 screenshot">
+            </figure>
+            <div class="project-body">
+              <h3>Pulse App</h3>
+              <p>Mobile-first PWA with offline sync and delightful microinteractions.</p>
+              <a class="link" href="#">View case study</a>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- SERVICES -->
+      <section id="services" class="services container">
+        <h2 class="section-title">Services</h2>
+        <div class="services-grid">
+          <div class="service card">
+            <h3>Product Design</h3>
+            <p>End-to-end product design from discovery to high-fidelity prototypes.</p>
+          </div>
+          <div class="service card">
+            <h3>Front-end Development</h3>
+            <p>Pixel-perfect HTML/CSS and modern JavaScript frameworks.</p>
+          </div>
+          <div class="service card">
+            <h3>Design Systems</h3>
+            <p>Reusable components and tokens for scale and consistency.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TESTIMONIALS -->
+      <section class="testimonials container">
+        <h2 class="section-title">Kind words</h2>
+        <div class="testimonials-row">
+          <blockquote class="quote card">“Olivia redesigned our product — conversion went up 34% within a month.”<cite>— Alex Morgan, CEO</cite></blockquote>
+          <blockquote class="quote card">“Flawless execution and stellar attention to detail.”<cite>— Priya Shah, Product Lead</cite></blockquote>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section id="contact" class="contact container">
+        <h2 class="section-title">Let’s build something beautiful</h2>
+        <div class="contact-grid">
+          <form class="contact-form" action="mailto:olivia@example.com" method="post" enctype="text/plain">
+            <label>Name<input type="text" name="name" required></label>
+            <label>Email<input type="email" name="email" required></label>
+            <label>Project details<textarea name="message" rows="6" required></textarea></label>
+            <button class="btn-primary" type="submit">Send message</button>
+          </form>
+
+          <aside class="contact-info card">
+            <h3>Contact</h3>
+            <p>Email: <a href="hamdankhankpk99@gmail.com">hamdankhankpk99@gmail.com</a></p>
+            <p>Based in: Remote</p>
+            <p><strong>Availability:</strong> Open for freelance & full-time</p>
+          </aside>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>© <span id="yr"></span> Hamdan Khan</div>
+        <div class="socials">
+          <a href="https://www.instagram.com/ham.dankhan46/">Instagram</a>
+          <a href="https://github.com/ihamdanddr302-cmd">Github</a>
+          <a href="https://www.linkedin.com/in/hamdan-khan-16b3b9374/">LinkedIn</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // small enhancement
+    document.getElementById('yr').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
