@@ -26,7 +26,6 @@
           <li><a href="#about">About</a></li>
           <li><a href="#work">Work</a></li>
           <li><a href="#services">Services</a></li>
-          <li><a href="#weather">Weather</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
         <a class="cta" href="#contact">Hire me</a>
@@ -134,31 +133,6 @@
           <div class="service card">
             <h3>Design Systems</h3>
             <p>Reusable components and tokens for scale and consistency.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- WEATHER APP -->
-      <section id="weather" class="weather-app container">
-        <h2 class="section-title">Weather App</h2>
-        <div class="weather-wrapper">
-          <div class="weather-card card-glass">
-            <div class="weather-search">
-              <input type="text" id="weather-input" placeholder="Search city..." class="weather-input">
-              <button id="weather-search-btn" class="weather-search-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-              </button>
-            </div>
-            
-            <div id="weather-content" class="weather-content">
-              <div class="weather-loading">
-                <div class="loading"></div>
-                <p>Getting weather data...</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -294,13 +268,6 @@
         title.classList.add('fade-in-up');
         observer.observe(title);
       });
-
-      // Weather section
-      const weatherWrapper = document.querySelector('.weather-wrapper');
-      if (weatherWrapper) {
-        weatherWrapper.classList.add('scale-in');
-        observer.observe(weatherWrapper);
-      }
     });
 
     // Smooth scroll for anchor links
@@ -401,162 +368,6 @@
       setTimeout(typeWriter, 500);
     }
 
-    // Weather App Functionality
-    (function() {
-      // IMPORTANT: Get your free API key from https://openweathermap.org/api
-      // Replace 'YOUR_API_KEY' with your actual OpenWeatherMap API key
-      const API_KEY = 'YOUR_API_KEY'; // Replace with your API key
-      const API_URL = 'https://api.openweathermap.org/data/2.5/weather';
-      
-      const weatherInput = document.getElementById('weather-input');
-      const weatherSearchBtn = document.getElementById('weather-search-btn');
-      const weatherContent = document.getElementById('weather-content');
-
-      // Weather icon mapping
-      const getWeatherIcon = (iconCode) => {
-        return `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-      };
-
-      // Format date
-      const formatDate = (timestamp) => {
-        const date = new Date(timestamp * 1000);
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
-      };
-
-      // Display weather data
-      const displayWeather = (data) => {
-        const html = `
-          <div class="weather-main">
-            <div class="weather-location">${data.name}, ${data.sys.country}</div>
-            <div class="weather-date">${formatDate(data.dt)}</div>
-            <img src="${getWeatherIcon(data.weather[0].icon)}" alt="${data.weather[0].description}" class="weather-icon">
-            <div class="weather-temp">${Math.round(data.main.temp)}°C</div>
-            <div class="weather-description">${data.weather[0].description}</div>
-          </div>
-          <div class="weather-details">
-            <div class="weather-detail-item">
-              <div class="weather-detail-label">Feels Like</div>
-              <div class="weather-detail-value">${Math.round(data.main.feels_like)}°C</div>
-            </div>
-            <div class="weather-detail-item">
-              <div class="weather-detail-label">Humidity</div>
-              <div class="weather-detail-value">${data.main.humidity}%</div>
-            </div>
-            <div class="weather-detail-item">
-              <div class="weather-detail-label">Wind Speed</div>
-              <div class="weather-detail-value">${Math.round(data.wind.speed * 3.6)} km/h</div>
-            </div>
-          </div>
-        `;
-        weatherContent.innerHTML = html;
-        weatherContent.classList.add('scale-in');
-        observer.observe(weatherContent);
-      };
-
-      // Display error
-      const displayError = (message) => {
-        const html = `
-          <div class="weather-error">
-            <div class="weather-error-icon">⚠️</div>
-            <div class="weather-error-message">${message}</div>
-            <div class="weather-error-hint">Please check your API key or try another city</div>
-          </div>
-        `;
-        weatherContent.innerHTML = html;
-      };
-
-      // Fetch weather data
-      const fetchWeather = async (city) => {
-        if (API_KEY === 'YOUR_API_KEY') {
-          displayError('API Key not configured. Please add your OpenWeatherMap API key in the script.');
-          return;
-        }
-
-        weatherContent.innerHTML = `
-          <div class="weather-loading">
-            <div class="loading"></div>
-            <p>Loading weather data...</p>
-          </div>
-        `;
-
-        try {
-          const response = await fetch(
-            `${API_URL}?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
-          );
-          
-          if (!response.ok) {
-            if (response.status === 401) {
-              throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
-            } else if (response.status === 404) {
-              throw new Error('City not found. Please try another city name.');
-            } else {
-              throw new Error('Failed to fetch weather data.');
-            }
-          }
-
-          const data = await response.json();
-          displayWeather(data);
-        } catch (error) {
-          displayError(error.message);
-        }
-      };
-
-      // Search button click
-      weatherSearchBtn.addEventListener('click', () => {
-        const city = weatherInput.value.trim();
-        if (city) {
-          fetchWeather(city);
-        }
-      });
-
-      // Enter key press
-      weatherInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          const city = weatherInput.value.trim();
-          if (city) {
-            fetchWeather(city);
-          }
-        }
-      });
-
-      // Get user location on load (optional)
-      if (navigator.geolocation && API_KEY !== 'YOUR_API_KEY') {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            fetch(`${API_URL}?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`)
-              .then(res => res.json())
-              .then(data => {
-                if (data.cod === 200) {
-                  displayWeather(data);
-                  weatherInput.value = data.name;
-                }
-              })
-              .catch(() => {
-                // Silent fail, user can search manually
-              });
-          },
-          () => {
-            // Silent fail, user can search manually
-          }
-        );
-      } else {
-        // Show default message
-        weatherContent.innerHTML = `
-          <div class="weather-loading">
-            <p>Enter a city name to get weather information</p>
-          </div>
-        `;
-      }
-
-      // Observe weather content for animations
-      if (weatherContent) {
-        weatherContent.classList.add('scale-in');
-        observer.observe(weatherContent);
-      }
-    })();
   </script>
 </body>
 </html>
