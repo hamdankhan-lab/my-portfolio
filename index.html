@@ -14,10 +14,42 @@
  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon_io/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
+  <link rel="manifest" href="/site.webmanifest">
 </head>
 <body>
-  <div class="site-wrapper">
+  <!-- Password Protection -->
+  <div id="password-protection" class="password-protection">
+    <div class="password-container">
+      <div class="password-card card-glass">
+        <div class="password-header">
+          <h1>Protected Portfolio</h1>
+          <p>Please enter the password to continue</p>
+        </div>
+        <form id="password-form" class="password-form">
+          <div class="password-input-group">
+            <input 
+              type="password" 
+              id="password-input" 
+              placeholder="Enter password" 
+              autocomplete="off"
+              required
+              autofocus
+            >
+            <button type="button" class="password-toggle-btn" id="password-toggle-btn" aria-label="Toggle password visibility">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <div id="password-error" class="password-error"></div>
+          <button type="submit" class="btn-primary btn-full">Access Portfolio</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="site-wrapper" id="main-content" style="display: none;">
 
     <header class="site-header">
       <nav class="nav container">
@@ -368,6 +400,92 @@
       setTimeout(typeWriter, 500);
     }
 
+    // Password Protection System
+    (function() {
+      // SET YOUR PASSWORD HERE - Change this to your desired password
+      const CORRECT_PASSWORD = 'hamdan2024'; // Change this password
+      
+      const passwordProtection = document.getElementById('password-protection');
+      const mainContent = document.getElementById('main-content');
+      const passwordForm = document.getElementById('password-form');
+      const passwordInput = document.getElementById('password-input');
+      const passwordError = document.getElementById('password-error');
+      const passwordToggleBtn = document.getElementById('password-toggle-btn');
+      
+      // Check if already authenticated in this session
+      if (sessionStorage.getItem('portfolio_authenticated') === 'true') {
+        passwordProtection.style.display = 'none';
+        mainContent.style.display = 'block';
+        return;
+      }
+
+      // Show password protection screen
+      passwordProtection.style.display = 'flex';
+      mainContent.style.display = 'none';
+
+      // Password toggle functionality
+      if (passwordToggleBtn) {
+        passwordToggleBtn.addEventListener('click', () => {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          
+          passwordToggleBtn.innerHTML = type === 'password' 
+            ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                 <circle cx="12" cy="12" r="3"></circle>
+               </svg>`
+            : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                 <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                 <line x1="1" y1="1" x2="23" y2="23"></line>
+               </svg>`;
+        });
+      }
+
+      // Form submission
+      if (passwordForm) {
+        passwordForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          
+          const enteredPassword = passwordInput.value.trim();
+          
+          // Clear previous error
+          passwordError.textContent = '';
+          passwordError.style.display = 'none';
+          
+          if (enteredPassword === CORRECT_PASSWORD) {
+            // Correct password - grant access
+            sessionStorage.setItem('portfolio_authenticated', 'true');
+            
+            // Smooth transition
+            passwordProtection.style.opacity = '0';
+            passwordProtection.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+              passwordProtection.style.display = 'none';
+              mainContent.style.display = 'block';
+              mainContent.style.opacity = '0';
+              mainContent.style.transition = 'opacity 0.5s ease';
+              
+              setTimeout(() => {
+                mainContent.style.opacity = '1';
+              }, 50);
+            }, 500);
+          } else {
+            // Wrong password - show error
+            passwordError.textContent = 'Incorrect password. Please try again.';
+            passwordError.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
+            
+            // Shake animation
+            passwordInput.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+              passwordInput.style.animation = '';
+            }, 500);
+          }
+        });
+      }
+    })();
   </script>
 </body>
 </html>
