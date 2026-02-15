@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nimbus Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #f0f4f8;
+      --bg-card: #ffffff;
+      --bg-sidebar: #1e293b;
+      --fg-main: #0f172a;
+      --fg-muted: #64748b;
+      --fg-sidebar: #e2e8f0;
+      --accent: #0ea5e9;
+      --accent-light: #e0f2fe;
+      --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #e2e8f0;
+      --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 60px -15px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --bg-sidebar: #020617;
+      --fg-main: #f1f5f9;
+      --fg-muted: #94a3b8;
+      --fg-sidebar: #e2e8f0;
+      --border: #334155;
+      --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 20px 60px -15px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-main);
+      color: var(--fg-main);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Layout */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      transition: grid-template-columns 0.3s ease;
+    }
+
+    .dashboard.sidebar-collapsed {
+      grid-template-columns: 80px 1fr;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-sidebar);
+      color: var(--fg-sidebar);
+      padding: 1.5rem;
+      position: fixed;
+      width: 260px;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: width 0.3s ease, padding 0.3s ease;
+      z-index: 100;
+    }
+
+    .sidebar-collapsed .sidebar {
+      width: 80px;
+      padding: 1.5rem 0.75rem;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+      padding: 0 0.5rem;
+    }
+
+    .sidebar-collapsed .sidebar-logo span {
+      opacity: 0;
+      width: 0;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav-section {
+      margin-bottom: 2rem;
+    }
+
+    .nav-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--fg-muted);
+      margin-bottom: 0.75rem;
+      padding: 0 0.75rem;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .sidebar-collapsed .nav-label {
+      opacity: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 10px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      margin-bottom: 0.25rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--fg-sidebar);
+    }
+
+    .nav-item.active {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--accent);
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 24px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .nav-text {
+      white-space: nowrap;
+      transition: opacity 0.2s ease;
+    }
+
+    .sidebar-collapsed .nav-text {
+      opacity: 0;
+      width: 0;
+    }
+
+    .sidebar-collapsed .nav-item {
+      justify-content: center;
+      padding: 0.75rem 0;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+    }
+
+    .sidebar-collapsed .main-content {
+      margin-left: 80px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .menu-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .search-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 250px;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--accent);
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--fg-main);
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .search-box input::placeholder {
+      color: var(--fg-muted);
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      color: var(--fg-muted);
+    }
+
+    .icon-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+    }
+
+    .profile-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.4rem 0.75rem 0.4rem 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .profile-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .profile-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: white;
+    }
+
+    .profile-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon.blue { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+    .stat-icon.orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+    .stat-trend {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    .stat-trend.up {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .stat-trend.down {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Charts Section */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    [data-theme="dark"] .filter-btn:hover, 
+    [data-theme="dark"] .filter-btn.active {
+      background: rgba(14, 165, 233, 0.15);
+    }
+
+    .chart-container {
+      height: 300px;
+      position: relative;
+    }
+
+    /* Donut Chart */
+    .donut-container {
+      height: 260px;
+      position: relative;
+    }
+
+    .donut-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .donut-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    .donut-label {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    /* Activity List */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--bg-main);
+      border-radius: 10px;
+      transition: background 0.2s ease;
+    }
+
+    .activity-item:hover {
+      background: var(--accent-light);
+    }
+
+    [data-theme="dark"] .activity-item:hover {
+      background: rgba(14, 165, 233, 0.1);
+    }
+
+    .activity-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .activity-title {
+      font-weight: 500;
+      margin-bottom: 0.15rem;
+    }
+
+    .activity-meta {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .activity-amount {
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .activity-amount.positive { color: var(--success); }
+    .activity-amount.negative { color: var(--danger); }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 1rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table tr:hover td {
+      background: var(--bg-main);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-badge.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status-badge.pending {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .status-badge.failed {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-in {
+        animation: none;
+        opacity: 1;
+      }
+    }
+
+    /* Focus Visible */
+    *:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+        padding: 1.5rem;
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .sidebar-collapsed .sidebar,
+      .sidebar-collapsed .main-content {
+        margin-left: 0;
+      }
+
+      .search-box {
+        display: none;
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--fg-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard" id="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar" role="navigation" aria-label="Main navigation">
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          </svg>
+        </div>
+        <span class="logo-text">Nimbus</span>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Main</div>
+        <a href="#" class="nav-item active" data-nav="dashboard">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-nav="analytics">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"/>
+            <path d="M18 17V9"/>
+            <path d="M13 17V5"/>
+            <path d="M8 17v-3"/>
+          </svg>
+          <span class="nav-text">Analytics</span>
+        </a>
+        <a href="#" class="nav-item" data-nav="projects">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="nav-text">Projects</span>
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="#" class="nav-item" data-nav="users">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span class="nav-text">Users</span>
+        </a>
+        <a href="#" class="nav-item" data-nav="messages">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="nav-text">Messages</span>
+        </a>
+        <a href="#" class="nav-item" data-nav="settings">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span class="nav-text">Settings</span>
+        </a>
+      </nav>
+
+      <nav class="nav-section" style="margin-top: auto; padding-top: 2rem;">
+        <a href="#" class="nav-item" id="themeToggle">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span class="nav-text">Light Mode</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+          </button>
+          <h1 class="page-title">Dashboard Overview</h1>
+        </div>
+        <div class="header-right">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="Search anything...">
+          </div>
+          <button class="icon-btn" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="notification-dot"></span>
+          </button>
+          <button class="profile-btn">
+            <div class="profile-avatar">NK</div>
+            <span class="profile-name">Nimbus K</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Stats Grid -->
+      <section class="stats-grid" aria-label="Statistics">
+        <div class="stat-card animate-in" style="animation-delay: 0.1s">
+          <div class="stat-header">
+            <div class="stat-icon blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <span class="stat-trend up">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m18 15-6-6-6 6"/>
+              </svg>
+              12.5%
+            </span>
+          </div>
+          <div class="stat-value">$48,352</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+
+        <div class="stat-card animate-in" style="animation-delay: 0.2s">
+          <div class="stat-header">
+            <div class="stat-icon green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <span class="stat-trend up">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m18 15-6-6-6 6"/>
+              </svg>
+              8.2%
+            </span>
+          </div>
+          <div class="stat-value">12,847</div>
+          <div class="stat-label">Active Users</div>
+        </div>
+
+        <div class="stat-card animate-in" style="animation-delay: 0.3s">
+          <div class="stat-header">
+            <div class="stat-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <path d="M8 21h8"/>
+                <path d="M12 17v4"/>
+              </svg>
+            </div>
+            <span class="stat-trend down">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+              3.1%
+            </span>
+          </div>
+          <div class="stat-value">2,459</div>
+          <div class="stat-label">Active Sessions</div>
+        </div>
+
+        <div class="stat-card animate-in" style="animation-delay: 0.4s">
+          <div class="stat-header">
+            <div class="stat-icon orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </div>
+            <span class="stat-trend up">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m18 15-6-6-6 6"/>
+              </svg>
+              24.8%
+            </span>
+          </div>
+          <div class="stat-value">98.7%</div>
+          <div class="stat-label">Uptime Status</div>
+        </div>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="charts-grid" aria-label="Charts">
+        <div class="card animate-in" style="animation-delay: 0.5s">
+          <div class="card-header">
+            <h2 class="card-title">Revenue Analytics</h2>
+            <div class="card-actions">
+              <button class="filter-btn active">Week</button>
+              <button class="filter-btn">Month</button>
+              <button class="filter-btn">Year</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card animate-in" style="animation-delay: 0.6s">
+          <div class="card-header">
+            <h2 class="card-title">Traffic Sources</h2>
+          </div>
+          <div class="donut-container">
+            <canvas id="trafficChart"></canvas>
+            <div class="donut-center">
+              <div class="donut-value">24.8K</div>
+              <div class="donut-label">Total Visits</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Activity & Table Section -->
+      <section class="charts-grid" aria-label="Activity and transactions">
+        <div class="card animate-in" style="animation-delay: 0.7s">
+          <div class="card-header">
+            <h2 class="card-title">Recent Activity</h2>
+            <button class="filter-btn">View All</button>
+          </div>
+          <div class="activity-list" id="activityList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div class="card animate-in" style="animation-delay: 0.8s">
+          <div class="card-header">
+            <h2 class="card-title">Latest Transactions</h2>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Transaction</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTable">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ==================== DATA ====================
+    const activityData = [
+      { name: "Sarah Chen", action: "Upgraded to Pro plan", time: "2 min ago", avatar: "SC", color: "#0ea5e9" },
+      { name: "Marcus Webb", action: "Created new project", time: "15 min ago", avatar: "MW", color: "#8b5cf6" },
+      { name: "Elena Rodriguez", action: "Submitted feedback", time: "1 hour ago", avatar: "ER", color: "#10b981" },
+      { name: "James Liu", action: "Completed onboarding", time: "3 hours ago", avatar: "JL", color: "#f59e0b" },
+    ];
+
+    const transactionData = [
+      { id: "TXN-8847", date: "Dec 12, 2024", amount: "+$2,450.00", status: "success" },
+      { id: "TXN-8846", date: "Dec 11, 2024", amount: "+$1,890.00", status: "success" },
+      { id: "TXN-8845", date: "Dec 11, 2024", amount: "-$340.00", status: "pending" },
+      { id: "TXN-8844", date: "Dec 10, 2024", amount: "+$5,200.00", status: "success" },
+      { id: "TXN-8843", date: "Dec 10, 2024", amount: "-$89.00", status: "failed" },
+    ];
+
+    // ==================== DOM ELEMENTS ====================
+    const dashboard = document.getElementById('dashboard');
+    const menuToggle = document.getElementById('menuToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const activityList = document.getElementById('activityList');
+    const transactionTable = document.getElementById('transactionTable');
+
+    // ==================== SIDEBAR TOGGLE ====================
+    menuToggle.addEventListener('click', () => {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        document.querySelector('.sidebar').classList.toggle('mobile-open');
+      } else {
+        dashboard.classList.toggle('sidebar-collapsed');
+      }
+    });
+
+    // ==================== THEME TOGGLE ====================
+    const themeText = themeToggle.querySelector('.nav-text');
+    const themeIcon = themeToggle.querySelector('.nav-icon');
+
+    function updateThemeUI(isDark) {
+      if (isDark) {
+        themeText.textContent = 'Dark Mode';
+        themeIcon.innerHTML = `
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        `;
+      } else {
+        themeText.textContent = 'Light Mode';
+        themeIcon.innerHTML = `
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        `;
+      }
+    }
+
+    themeToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      updateThemeUI(!isDark);
+      updateChartColors(!isDark);
+    });
+
+    // ==================== RENDER ACTIVITY ====================
+    function renderActivity() {
+      activityList.innerHTML = activityData.map(item => `
+        <div class="activity-item">
+          <div class="activity-avatar" style="background: ${item.color}20; color: ${item.color}">
+            ${item.avatar}
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">${item.name}</div>
+            <div class="activity-meta">${item.action}</div>
+          </div>
+          <div class="activity-meta">${item.time}</div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== RENDER TRANSACTIONS ====================
+    function renderTransactions() {
+      transactionTable.innerHTML = transactionData.map(item => `
+        <tr>
+          <td class="mono" style="font-size: 0.85rem;">${item.id}</td>
+          <td style="color: var(--fg-muted); font-size: 0.85rem;">${item.date}</td>
+          <td class="activity-amount ${item.amount.startsWith('+') ? 'positive' : 'negative'} mono">${item.amount}</td>
+          <td>
+            <span class="status-badge ${item.status}">
+              <span class="status-dot"></span>
+              ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ==================== CHARTS ====================
+    let revenueChart = null;
+    let trafficChart = null;
+
+    function getChartColors() {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      return {
+        text: isDark ? '#94a3b8' : '#64748b',
+        grid: isDark ? '#334155' : '#e2e8f0',
+        accent: '#0ea5e9',
+        accentLight: 'rgba(14, 165, 233, 0.1)',
+      };
+    }
+
+    function initCharts() {
+      const colors = getChartColors();
+
+      // Revenue Chart
+      const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+      revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Revenue',
+            data: [4200, 5800, 4900, 7200, 6100, 8500, 9200],
+            borderColor: colors.accent,
+            backgroundColor: colors.accentLight,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: colors.accent,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              padding: 12,
+              titleFont: { family: 'Outfit', size: 14 },
+              bodyFont: { family: 'JetBrains Mono', size: 13 },
+              callbacks: {
+                label: (ctx) => `$${ctx.raw.toLocaleString()}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: colors.text, font: { family: 'Outfit' } }
+            },
+            y: {
+              grid: { color: colors.grid },
+              ticks: {
+                color: colors.text,
+                font: { family: 'JetBrains Mono', size: 11 },
+                callback: (val) => '$' + val / 1000 + 'k'
+              }
+            }
+          }
+        }
+      });
+
+      // Traffic Chart
+      const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+      trafficChart = new Chart(trafficCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Direct', 'Organic', 'Referral', 'Social'],
+          datasets: [{
+            data: [35, 30, 20, 15],
+            backgroundColor: ['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b'],
+            borderWidth: 0,
+            spacing: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: colors.text,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                padding: 20,
+                font: { family: 'Outfit', size: 12 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChartColors(isDark) {
+      if (!revenueChart || !trafficChart) return;
+      
+      const colors = getChartColors();
+      
+      // Update Revenue Chart
+      revenueChart.options.scales.x.ticks.color = colors.text;
+      revenueChart.options.scales.y.ticks.color = colors.text;
+      revenueChart.options.scales.y.grid.color = colors.grid;
+      revenueChart.update();
+
+      // Update Traffic Chart
+      trafficChart.options.plugins.legend.labels.color = colors.text;
+      trafficChart.update();
+    }
+
+    // ==================== FILTER BUTTONS ====================
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const parent = this.parentElement;
+        parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // ==================== NAV ITEMS ====================
+    document.querySelectorAll('.nav-item[data-nav]').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // ==================== INIT ====================
+    renderActivity();
+    renderTransactions();
+    initCharts();
+
+    // Handle resize for sidebar
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        document.querySelector('.sidebar').classList.remove('mobile-open');
+      }
+    });
+  </script>
+</body>
+</html>
