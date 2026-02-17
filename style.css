@@ -813,6 +813,24 @@ section, header, footer {
     height: 210px;
   }
 
+  .hero-visual {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .card-glass {
+    height: auto;
+  }
+
+  .portrait {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center top;
+  }
+
   .footer-inner {
     justify-content: center;
   }
@@ -854,7 +872,15 @@ section, header, footer {
   }
 
   .card-glass {
-    height: 310px;
+    height: auto;
+  }
+
+  .hero-visual {
+    max-width: 300px;
+  }
+
+  .portrait {
+    aspect-ratio: 3 / 4;
   }
 
   .stats {
