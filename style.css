@@ -625,3 +625,76 @@ section, header, footer {
     transform: translateY(0);
   }
 }
+@media (max-width: 768px) {
+  .nav {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cta {
+    margin-top: 10px;
+  }
+}
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 30px;
+  }
+
+  .hero-visual {
+    order: -1;
+    transform: none !important;
+  }
+
+  .hero-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .portrait {
+    max-width: 220px;
+    margin: auto;
+  }
+}
+@media (max-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .skills {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .work-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project img {
+    width: 100%;
+    height: auto;
+  }
+}
+@media (max-width: 768px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-form,
+  .contact-info {
+    width: 100%;
+  }
+}
