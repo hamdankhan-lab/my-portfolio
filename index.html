@@ -21,7 +21,12 @@
     <header class="site-header">
       <nav class="nav container">
         <a class="brand" href="#">Hamdan Khan</a>
-        <ul class="nav-list">
+        <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-list">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <ul class="nav-list" id="nav-list">
           <li><a href="#about">About</a></li>
           <li><a href="#work">Work</a></li>
           <li><a href="#services">Services</a></li>
@@ -281,6 +286,32 @@
         }
       });
     });
+
+    // Mobile navbar toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const navList = document.getElementById('nav-list');
+    const navCta = document.querySelector('.nav .cta');
+    if (navToggle && navList) {
+      navToggle.addEventListener('click', () => {
+        const isOpen = navList.classList.toggle('is-open');
+        navToggle.classList.toggle('is-open', isOpen);
+        navToggle.setAttribute('aria-expanded', String(isOpen));
+        if (navCta) {
+          navCta.classList.toggle('is-open', isOpen);
+        }
+      });
+
+      document.querySelectorAll('.nav-list a').forEach((link) => {
+        link.addEventListener('click', () => {
+          navList.classList.remove('is-open');
+          navToggle.classList.remove('is-open');
+          navToggle.setAttribute('aria-expanded', 'false');
+          if (navCta) {
+            navCta.classList.remove('is-open');
+          }
+        });
+      });
+    }
 
     // Parallax effect for hero section
     window.addEventListener('scroll', () => {
