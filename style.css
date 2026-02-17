@@ -196,6 +196,7 @@ section, header, footer {
   width: 100%;
 }
 
+
 .cta {
   padding: 10px 18px;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
